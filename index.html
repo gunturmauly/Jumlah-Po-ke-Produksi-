@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RENCANA PRODUKSI</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url('cuyo.jpg'); /* Ganti dengan path gambar */
+            background-size: cover;
+            background-position: center;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Elemen sebelum body untuk blur latar belakang */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('header_bg.jpg'); /* Gambar yang sama */
+            background-size: cover;
+            background-position: center;
+            filter: blur(8px); /* Membuat latar belakang blur */
+            z-index: -1; /* Meletakkan blur di belakang konten */
+        }
+
+        .container {
+            background-color: rgba(0, 0, 0, 0.7); /* Latar belakang semi-transparan untuk teks */
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            text-align: center;
+            color: #f39c12;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        label {
+            color: #f39c12;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #f39c12;
+            color: white;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #e67e22;
+        }
+
+        #hasil {
+            margin-top: 20px;
+            font-size: 16px;
+        }
+
+        p {
+            margin: 5px 0;
+        }
+    </style>
+    <script>
+        function hitung() {
+            // Ambil nilai dari input
+            const jumlahPO = parseFloat(document.getElementById('jumlahPO').value);
+            const beratPerPcs = parseFloat(document.getElementById('beratPerPcs').value);
+            const waktuPerPcs = parseFloat(document.getElementById('waktuPerPcs').value);
+            const cvt = parseFloat(document.getElementById('cvt').value);
+
+            // Hitung total berat dalam kg (1 pcs dalam gram)
+            const totalBeratKg = (jumlahPO * beratPerPcs) / 1000; // gram ke kg
+
+            // Hitung waktu total untuk menyelesaikan jumlah PO (dalam detik)
+            const totalWaktuDetik = (jumlahPO * waktuPerPcs) / cvt;
+
+            // Konversi total waktu dari detik ke jam
+            const waktuDalamJam = totalWaktuDetik / 3600;
+
+            // Hitung pcs yang bisa diproduksi dalam 1 shift (12 jam)
+            const shiftJam = 12;
+            const pcsPerShift = Math.floor((shiftJam * 3600 * cvt) / waktuPerPcs);
+
+            // Hitung berapa shift yang diperlukan untuk menyelesaikan PO
+            const shiftDiperlukan = Math.ceil(jumlahPO / pcsPerShift);
+
+            // Tentukan jumlah shift per hari
+            const shiftPerHari = 2; // Misalnya 2 shift per hari
+
+            // Hitung berapa hari yang diperlukan untuk menyelesaikan PO
+            const hariDiperlukan = Math.ceil(shiftDiperlukan / shiftPerHari);
+
+            // Tampilkan hasil
+            document.getElementById('hasil').innerHTML = `
+                <p>Total Berat: ${totalBeratKg.toFixed(2)} kg</p>
+                <p>Total Waktu: ${waktuDalamJam.toFixed(2)} jam</p>
+                <p>Jumlah pcs dalam satu shift (12 jam): ${pcsPerShift} pcs</p>
+                <p>Shift yang diperlukan untuk menyelesaikan PO: ${shiftDiperlukan} shift</p>
+                <p>Hari yang diperlukan untuk menyelesaikan PO: ${hariDiperlukan} hari</p>
+            `;
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>RENCANA PRODUKSI</h1>
+        <label for="jumlahPO">Jumlah PO (pcs):</label>
+        <input type="number" id="jumlahPO" required><br>
+
+        <label for="beratPerPcs">Berat per pcs (gram):</label>
+        <input type="number" id="beratPerPcs" required><br>
+
+        <label for="waktuPerPcs">Cycle time (detik):</label>
+        <input type="number" id="waktuPerPcs" required><br>
+
+        <label for="cvt">CVT(cvt):</label>
+        <input type="number" id="cvt" required><br>
+
+        <button onclick="hitung()">Hitung</button>
+
+        <div id="hasil"></div>
+    </div>
+</body>
+</html>
