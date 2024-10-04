@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RENCANA PRODUKSI</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url('cuyo.jpg'); /* Ganti dengan path gambar */
+            background-size: cover;
+            background-position: center;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('header_bg.jpg'); /* Gambar yang sama */
+            background-size: cover;
+            background-position: center;
+            filter: blur(8px); /* Membuat latar belakang blur */
+            z-index: -1; /* Meletakkan blur di belakang konten */
+        }
+
+        .container {
+            background-color: rgba(0, 0, 0, 0.7); /* Latar belakang semi-transparan untuk teks */
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            text-align: center;
+            color: #f39c12;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        label {
+            color: #f39c12;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #f39c12;
+            color: white;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #e67e22;
+        }
+
+        #hasil {
+            margin-top: 20px;
+            font-size: 16px;
+        }
+
+        p {
+            margin: 5px 0;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+
+        #masterbet {
+            font-size: 16px; /* Membesarkan ukuran font untuk input masterbet */
+        }
+    </style>
+    <script>
+        function formatAngka(input) {
+            let angka = input.value.replace(/\D/g, ''); // Hapus karakter non-digit
+            input.value = angka.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Format dengan titik
+        }
+
+        function hitung() {
+            const jumlahPO = parseFloat(document.getElementById('jumlahPO').value.replace(/\./g, '')) || 0;
+            const beratPerPcs = parseFloat(document.getElementById('beratPerPcs').value) || 0;
+            const waktuPerPcs = parseFloat(document.getElementById('waktuPerPcs').value) || 0;
+            const cvt = parseFloat(document.getElementById('cvt').value) || 0;
+            const gunakanMasterbet = document.getElementById('gunakanMasterbet').checked;
+            const masterbet = parseFloat(document.getElementById('masterbet').value.replace(/\./g, '')) || 0;
+
+            // Validasi input
+            if (jumlahPO <= 0 || beratPerPcs <= 0 || waktuPerPcs <= 0 || cvt <= 0) {
+                alert("Mohon masukkan semua nilai dengan benar.");
+                return;
+            }
+
+            const totalBeratGram = jumlahPO * beratPerPcs;
+            const totalBeratKg = Math.floor(totalBeratGram / 1000); // Menghilangkan desimal
+            const totalWaktuDetik = (jumlahPO * waktuPerPcs) / cvt;
+            const waktuDalamJam = totalWaktuDetik / 3600;
+            const shiftJam = 12;
+            const pcsPerShift = Math.floor((shiftJam * 3600 * cvt) / waktuPerPcs);
+            const shiftDiperlukan = Math.ceil(jumlahPO / pcsPerShift);
+            const shiftPerHari = 2;
+            const hariDiperlukan = Math.ceil(shiftDiperlukan / shiftPerHari);
+
+            // Hitung Masterbet jika diaktifkan
+            let totalMasterbet = 0;
+            if (gunakanMasterbet) {
+                totalMasterbet = (totalBeratGram * masterbet) / 100;
+            }
+
+            // Konversi total masterbet dari gram ke kg
+            const totalMasterbetKg = Math.floor(totalMasterbet / 1000); // Menghilangkan desimal
+
+            document.getElementById('hasil').innerHTML = `
+                <p>Total Berat: ${totalBeratKg.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')} kg</p>
+                <p>Total Waktu: ${waktuDalamJam.toFixed(2)} jam</p>
+                <p>Jumlah pcs dalam satu shift (12 jam): ${pcsPerShift} pcs</p>
+                <p>Shift yang diperlukan untuk menyelesaikan PO: ${shiftDiperlukan} shift</p>
+                <p>Hari yang diperlukan untuk menyelesaikan PO: ${hariDiperlukan} hari</p>
+                ${gunakanMasterbet ? `<p>Total Masterbet: ${totalMasterbetKg.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')} kg</p>` : ''}
+            `;
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>RENCANA PRODUKSI</h1>
+        <label for="jumlahPO">Jumlah PO (pcs):</label>
+        <input type="text" id="jumlahPO" oninput="formatAngka(this)" required aria-label="Jumlah PO (pcs)"><br>
+
+        <label for="beratPerPcs">Berat per pcs (gram):</label>
+        <input type="number" id="beratPerPcs" required aria-label="Berat per pcs (gram)"><br>
+
+        <label for="waktuPerPcs">Cycle time (detik):</label>
+        <input type="number" id="waktuPerPcs" required aria-label="Cycle time (detik)"><br>
+
+        <label for="cvt">CVT (cvt):</label>
+        <input type="number" id="cvt" required aria-label="CVT (cvt)"><br>
+
+        <!-- Tambahan Masterbet -->
+        <div class="checkbox-label">
+            <label><input type="checkbox" id="gunakanMasterbet" onchange="document.getElementById('masterbet').disabled = !this.checked;"> Gunakan Masterbet</label>
+            <input type="text" id="masterbet" oninput="formatAngka(this)" placeholder="0" disabled style="margin-left: 10px; flex: 1; font-size: 16px;"> %
+        </div>
+
+        <button onclick="hitung()">Hitung</button>
+
+        <div id="hasil"></div>
+    </div>
+</body>
+</html>
